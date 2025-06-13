@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" prefHeight="637.0" prefWidth="924.0" spacing="20.0" style="-fx-background-color: black;" styleClass="black-bg" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.uaspbo_voidthreat_kapalangkasa.controller.MainMenuController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="52.0" prefWidth="485.0" text="Record" textAlignment="CENTER" textFill="WHITE">
+      <font>
+         <Font name="Gadugi" size="50.0" />
+      </font></Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="1. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="2. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="3. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="4. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="5. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="6. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="7 " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="8. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="9. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <Label prefHeight="17.0" prefWidth="599.0" text="10. " textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+</VBox>
