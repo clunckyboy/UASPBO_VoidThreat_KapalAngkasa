@@ -118,7 +118,7 @@ public class GameController {
         if(gameOver) {
             gc.setFont(Font.font(35));
             gc.setFill(Color.YELLOW);
-            gc.fillText("Game Over \n Your Score is: " + score + " \n Click to play again", WIDTH / 2, HEIGHT /2.5);
+            gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT /2.5);
             //	return;
         }
         univ.forEach(Universe::draw);
