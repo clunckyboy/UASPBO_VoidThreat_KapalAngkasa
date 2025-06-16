@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.uaspbo_voidthreat_kapalangkasa.controller.GameController">
+
+    <!-- Area utama game -->
+    <AnchorPane fx:id="gamePane" prefHeight="600" prefWidth="800" style="-fx-background-color: black;">
+
+        <!-- Roket pemain -->
+        <ImageView fx:id="player" fitHeight="48" fitWidth="85.0" layoutX="400.0" layoutY="512.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@assets/rocket.png" />
+            </image>
+        </ImageView>
+
+        <!-- Label skor -->
+        <Label fx:id="scoreLabel" layoutX="700" layoutY="20" style="-fx-text-fill: white; -fx-font-size: 18px;" text="Score: 0" />
+    </AnchorPane>
+
+</AnchorPane>

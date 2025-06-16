@@ -20,6 +20,7 @@
             <artifactId>javafx-controls</artifactId>
             <version>17.0.6</version>
         </dependency>
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
@@ -32,12 +33,21 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -61,7 +71,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.game.uaspbo_voidthreat_kapalangkasa/com.game.uaspbo_voidthreat_kapalangkasa.HelloApplication
+                                com.game.uaspbo_voidthreat_kapalangkasa/com.game.uaspbo_voidthreat_kapalangkasa.GameApp
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

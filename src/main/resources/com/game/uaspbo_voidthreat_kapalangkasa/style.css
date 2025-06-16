@@ -1,0 +1,65 @@
+.table-view {
+    -fx-background-color: black;
+    -fx-control-inner-background: black;
+    -fx-table-cell-border-color: transparent;
+    -fx-text-background-color: white;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+/* Gaya untuk baris-baris tabel */
+.table-row-cell {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+/* Gaya untuk isi sel */
+.table-cell {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+/* Gaya untuk header kolom */
+.table-view .column-header-background {
+    -fx-background-color: black;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: black;
+    -fx-border-color: transparent;
+}
+
+.table-view .label {
+    -fx-text-fill: white;
+}
+
+/* Ubah ukuran teks pada sel data */
+.table-view .table-cell {
+    -fx-font-size: 20px; /* ubah sesuai kebutuhan */
+    -fx-alignment: CENTER;
+}
+
+/* Ubah ukuran teks pada header kolom */
+.table-view .column-header .label {
+    -fx-font-size: 14px; /* ubah sesuai kebutuhan */
+    -fx-alignment: CENTER;
+    -fx-text-fill: black;
+    -fx-pref-height: 0px;
+}
+
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.table-row-cell:filled:selected,
+.table-row-cell:filled:selected:hover {
+    -fx-background-color: transparent;
+}

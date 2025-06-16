@@ -7,10 +7,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class HelloApplication extends Application {
+public class GameApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("MainMenu.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(GameApp.class.getResource("MainMenu.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Void Threat");
         stage.setScene(scene);
