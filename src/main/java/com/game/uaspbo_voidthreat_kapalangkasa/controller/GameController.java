@@ -1,5 +1,6 @@
 package com.game.uaspbo_voidthreat_kapalangkasa.controller;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -7,15 +8,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Application;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -23,7 +22,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class GameController {
 
@@ -38,26 +36,26 @@ public class GameController {
     private static final int HEIGHT = 600;
     private static final int PLAYER_SIZE = 60;
 
-    static final Image PLAYER_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/player.png").toExternalForm());
-    static final Image EXPLOSION_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/explosion.png").toExternalForm());
+    static final Image PLAYER_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihrocket.png").toExternalForm());
+    static final Image EXPLOSION_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihplosion.png").toExternalForm());
 
-    static final int EXPLOSION_W = 128;
-    static final int EXPLOSION_ROWS = 3;
-    static final int EXPLOSION_COL = 3;
-    static final int EXPLOSION_H = 128;
-    static final int EXPLOSION_STEPS = 15;
+    static final int EXPLOSION_W = 32;
+    static final int EXPLOSION_ROWS = 7;
+    static final int EXPLOSION_COL = 7;
+    static final int EXPLOSION_H = 32;
+    static final int EXPLOSION_STEPS = 8;
 
     static final Image BOMBS_IMG[] = {
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/1.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/2.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/3.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/4.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/5.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/6.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/7.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/8.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/9.png").toExternalForm()),
-        new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/10.png").toExternalForm())
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihroids.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/dihazard1.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/dihazard2.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/4.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/5.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/6.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/7.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/8.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/9.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/10.png").toExternalForm())
     };
 
     final int MAX_BOMBS = 10, MAX_SHOTS = MAX_BOMBS * 2;
@@ -71,24 +69,39 @@ public class GameController {
 
     private double mouseX;
     private int score;
-
+    private long lastFrameTime; // For Delta Time calculation
 
     /* Start Game */
     public void start(Stage stage) throws Exception {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> run(gc)));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+
+        // **MODIFICATION**: Use AnimationTimer for a smooth game loop and delta time calculation
+        lastFrameTime = System.nanoTime();
+        AnimationTimer gameLoop = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                // Calculate time elapsed since last frame, in seconds
+                double deltaTime = (now - lastFrameTime) / 1_000_000_000.0;
+                lastFrameTime = now;
+                run(gc, deltaTime);
+            }
+        };
+        gameLoop.start();
+
         canvas.setCursor(Cursor.MOVE);
         canvas.setOnMouseMoved(e -> mouseX = e.getX());
         canvas.setOnMouseClicked(e -> {
-            if(shots.size() < MAX_SHOTS) shots.add(player.shoot());
+            if(shots.size() < MAX_SHOTS)
+                shots.add(player.shoot()); SoundManager.playSound("sfx1.wav");
             if(gameOver) {
+                // Stop the game loop before changing scenes
+                gameLoop.stop();
                 saveScoreToDatabase();
                 backToMainMenu(stage); // kembali ke Main Menu
             }
         });
+
         setup();
         stage.setScene(new Scene(new StackPane(canvas)));
         stage.setTitle("Void Threat");
@@ -100,13 +113,14 @@ public class GameController {
         univ = new ArrayList<>();
         shots = new ArrayList<>();
         Bombs = new ArrayList<>();
-        player = new Rocket(WIDTH / 2, HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_IMG);
+        player = new Rocket(WIDTH / 2.0, HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_IMG);
         score = 0;
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
     }
 
     /*Run Graphics*/
-    private void run(GraphicsContext gc) {
+    // **MODIFICATION**: Run method now accepts deltaTime to keep game speed consistent
+    private void run(GraphicsContext gc, double deltaTime) {
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
@@ -114,25 +128,26 @@ public class GameController {
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 60,  20);
 
-
         if(gameOver) {
             gc.setFont(Font.font(35));
             gc.setFill(Color.YELLOW);
             gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT /2.5);
-            //	return;
+            return; // Stop processing the game loop when the game is over
         }
-        univ.forEach(Universe::draw);
 
-        player.update();
+        // **MODIFICATION**: Pass deltaTime to objects that need to update their position
+        univ.forEach(u -> u.draw(deltaTime));
+
+        player.update(deltaTime);
         player.draw();
         player.posX = (int) mouseX;
 
-        Bombs.stream().peek(Rocket::update).peek(Rocket::draw).forEach(e -> {
+        Bombs.stream().peek(bomb -> bomb.update(deltaTime)).peek(Rocket::draw).forEach(e -> {
             if(player.colide(e) && !player.exploding) {
+                SoundManager.playSound("sfx3.wav");
                 player.explode();
             }
         });
-
 
         for (int i = shots.size() - 1; i >=0 ; i--) {
             Shot shot = shots.get(i);
@@ -140,11 +155,12 @@ public class GameController {
                 shots.remove(i);
                 continue;
             }
-            shot.update();
+            shot.update(deltaTime);
             shot.draw();
             for (Bomb bomb : Bombs) {
                 if(shot.colide(bomb) && !bomb.exploding) {
                     score++;
+                    SoundManager.playSound("sfx2.wav");
                     bomb.explode();
                     shot.toRemove = true;
                 }
@@ -161,21 +177,34 @@ public class GameController {
         if(RAND.nextInt(10) > 2) {
             univ.add(new Universe());
         }
-        for (int i = 0; i < univ.size(); i++) {
+
+        // **MODIFICATION**: Optimized removal loop by iterating backwards
+        for (int i = univ.size() - 1; i >= 0; i--) {
             if(univ.get(i).posY > HEIGHT)
                 univ.remove(i);
         }
     }
 
     /* Player */
+    /* Player */
     public class Rocket {
-
-        int posX, posY, size;
+        // **MODIFICATION**: Use double for position for precision
+        double posX, posY;
+        int size;
         boolean exploding, destroyed;
         Image img;
-        int explosionStep = 0;
 
-        public Rocket(int posX, int posY, int size, Image image){
+        // --- NEW AND MODIFIED VARIABLES FOR ANIMATION SPEED ---
+        // This timer tracks how long the explosion has been active.
+        private double explosionTimer = 0;
+
+        // **THE IMPORTANT PART**: This is your new control knob.
+        // Set how long the explosion animation should last, in seconds.
+        // Smaller number = faster explosion. Larger number = slower explosion.
+        private static final double EXPLOSION_DURATION = 0.7; // e.g., 0.7 seconds total duration
+
+
+        public Rocket(double posX, double posY, int size, Image image){
             this.posX = posX;
             this.posY = posY;
             this.size = size;
@@ -183,92 +212,121 @@ public class GameController {
         }
 
         public Shot shoot(){
-            return new Shot(posX + size / 2 - Shot.size / 2, posY - Shot.size);
+            return new Shot(posX + size / 2.0 - Shot.size / 2.0, posY - Shot.size);
         }
 
-        public void update(){
-            if(exploding) explosionStep++;
-            destroyed = explosionStep > EXPLOSION_STEPS;
+        // **MODIFICATION**: The update method now needs deltaTime to update the timer.
+        public void update(double deltaTime){
+            if (exploding) {
+                // If exploding, add the elapsed time to our timer.
+                explosionTimer += deltaTime;
+            }
+            // The rocket is considered destroyed once the timer has passed the desired duration.
+            destroyed = explosionTimer > EXPLOSION_DURATION;
         }
 
         public void draw(){
             if(exploding){
-                gc.drawImage(EXPLOSION_IMG, explosionStep % EXPLOSION_COL * EXPLOSION_W,
-                        (explosionStep / EXPLOSION_ROWS) * EXPLOSION_H + 1, EXPLOSION_W, EXPLOSION_H, posX, posY, size, size);
+                // --- NEW ANIMATION LOGIC ---
+                // Calculate which frame to show based on time, not frame count.
+                int frame = (int)((explosionTimer / EXPLOSION_DURATION) * EXPLOSION_STEPS);
+
+                // Make sure we don't try to draw a frame that doesn't exist.
+                if (frame >= EXPLOSION_STEPS) {
+                    frame = EXPLOSION_STEPS - 1;
+                }
+
+                // Draw the calculated frame.
+                gc.drawImage(EXPLOSION_IMG, frame % EXPLOSION_COL * EXPLOSION_W,
+                        (frame / EXPLOSION_ROWS) * EXPLOSION_H + 1, EXPLOSION_W, EXPLOSION_H,
+                        (int)posX, (int)posY, size, size);
             } else {
-                gc.drawImage(img, posX, posY, size, size);
+                gc.drawImage(img, (int)posX, (int)posY, size, size);
             }
         }
 
         public boolean colide(Rocket other){
-            int d = distance(this.posX + size / 2, this.posY + size / 2,
-                    other.posX + other.size / 2, other.posY + other.size / 2);
-            return d < other.size / 2 + this.size / 2;
+            int r = this.size / 2 + other.size / 2;
+            return distanceSq(this.posX + size / 2.0, this.posY + size / 2.0,
+                    other.posX + other.size / 2.0, other.posY + other.size / 2.0) < r * r;
         }
 
         public void explode(){
             exploding = true;
-            explosionStep = -1;
+            // Reset the timer to 0 when the explosion starts.
+            explosionTimer = 0;
         }
     }
 
-
-
     public class Bomb extends Rocket {
+        // **MODIFICATION**: Speed is now in pixels-per-second
+        public double getSpeed() {
+            // Original logic was ((score/5) + 2) pixels-per-frame at 10fps.
+            // We multiply by 10 to get an equivalent pixels-per-second speed.
+            return ((score / 5.0) + 2) * 20;
+        }
 
-        int SPEED = (score/5) + 2;
-
-        public Bomb(int posX, int posY, int size, Image image){
+        public Bomb(double posX, double posY, int size, Image image){
             super(posX,posY,size,image);
         }
 
-        public void update(){
-            super.update();
-            if(!exploding && !destroyed) posY += SPEED;
+        // **MODIFICATION**: Update method uses deltaTime for consistent speed
+        public void update(double deltaTime){
+            super.update(deltaTime);
+            if(!exploding && !destroyed) posY += getSpeed() * deltaTime;
             if(posY > HEIGHT) destroyed = true;
         }
     }
 
     /* Peluru */
     public class Shot {
-
         public boolean toRemove;
-
-        int posX, posY, speed = 10;
+        // **MODIFICATION**: Position is double, speed is in pixels-per-second
+        double posX, posY;
+        double speed = 100; // 10 pixels/frame at 10fps -> 100 pixels/second
+        double specialSpeed = 500; // A faster speed for the power-up
         static final int size = 6;
 
-        public Shot(int posX, int posY) {
+        public Shot(double posX, double posY) {
             this.posX = posX;
             this.posY = posY;
         }
 
-        public void update(){
-            posY-=speed;
+        // **MODIFICATION**: Uses deltaTime for consistent speed
+        public void update(double deltaTime){
+            double currentSpeed = speed;
+            if (score >= 50 && score <= 70 || score >= 120) {
+                currentSpeed = specialSpeed;
+            }
+            posY -= currentSpeed * deltaTime;
         }
 
         public void draw(){
+            // **MODIFICATION**: Cast to int for drawing. Logic moved to update().
             gc.setFill(Color.RED);
             if(score >= 50 && score <= 70 || score >= 120){
                 gc.setFill(Color.PEACHPUFF);
-                speed = 50;
-                gc.fillRect(posX-5, posY-10, size+10, size+30);
+                gc.fillRect((int)posX-5, (int)posY-10, size+10, size+30);
             } else{
-                gc.fillOval(posX, posY, size, size);
+                gc.fillOval((int)posX, (int)posY, size, size);
             }
         }
 
+        // **MODIFICATION**: Uses faster squared-distance collision check
         public boolean colide(Rocket Rocket){
-            int distance = distance(this.posX + size / 2, this.posY + size / 2,
-                    Rocket.posX + Rocket.size / 2, Rocket.posY + Rocket.size / 2 );
-            return distance < Rocket.size / 2 + size / 2;
+            int r = Rocket.size / 2 + size / 2;
+            return distanceSq(this.posX + size / 2.0, this.posY + size / 2.0,
+                    Rocket.posX + Rocket.size / 2.0, Rocket.posY + Rocket.size / 2.0) < r * r;
         }
     }
 
-    //environtment
+    //environment
     public class Universe {
-        int posX, posY;
+        double posX, posY; // **MODIFICATION**: Position is double
         private int h,w,r,g,b;
         private double opacity;
+        // **MODIFICATION**: Speed in pixels-per-second
+        private final double speed = 200; // 20 pixels/frame at 10fps -> 200 pixels/second
 
         public Universe(){
             posX = RAND.nextInt(WIDTH);
@@ -283,12 +341,13 @@ public class GameController {
             if(opacity > 0.5) opacity = 0.5;
         }
 
-        public void draw(){
+        // **MODIFICATION**: draw() now also updates position using deltaTime
+        public void draw(double deltaTime){
             if(opacity > 0.8) opacity -= 0.01;
             if(opacity < 0.1) opacity += 0.01;
             gc.setFill(Color.rgb(r,g,b,opacity));
-            gc.fillOval(posX, posY, w, h);
-            posY += 20;
+            gc.fillOval((int)posX, (int)posY, w, h);
+            posY += speed * deltaTime;
         }
     }
 
@@ -297,13 +356,15 @@ public class GameController {
                 BOMBS_IMG[RAND.nextInt(BOMBS_IMG.length)]);
     }
 
-    int distance(int x1, int y1, int x2, int y2){
-        return (int) Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1 - y2), 2));
+    // **OPTIMIZATION**: New method to calculate squared distance, avoids expensive Math.sqrt()
+    double distanceSq(double x1, double y1, double x2, double y2){
+        return Math.pow((x1-x2),2) + Math.pow((y1 - y2), 2);
     }
 
     /* Simpan skor ke database */
     private void saveScoreToDatabase() {
         try {
+            // It's good practice to use try-with-resources for DB connections
             Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/void_threat", "postgres", "12345678");
             String sql = "INSERT INTO scores (player_name, score) VALUES (?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -334,5 +395,4 @@ public class GameController {
             }
         });
     }
-
 }
