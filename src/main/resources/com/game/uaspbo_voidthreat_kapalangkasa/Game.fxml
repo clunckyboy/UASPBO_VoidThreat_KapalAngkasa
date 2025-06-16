@@ -8,12 +8,12 @@
 <AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.uaspbo_voidthreat_kapalangkasa.controller.GameController">
 
     <!-- Area utama game -->
-    <AnchorPane fx:id="gamePane" prefHeight="600" prefWidth="800" style="-fx-background-color: black;">
+    <AnchorPane fx:id="gamePane" prefHeight="600" prefWidth="800" style="-fx-background-color: black;" snapToPixel="true">
 
         <!-- Roket pemain -->
-        <ImageView fx:id="player" fitHeight="48" fitWidth="85.0" layoutX="400.0" layoutY="512.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fx:id="player" fitHeight="48" fitWidth="85.0" layoutX="28.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true">
             <image>
-                <Image url="@assets/rocket.png" />
+                <Image url="@assets/Dihrocket.png" />
             </image>
         </ImageView>
 

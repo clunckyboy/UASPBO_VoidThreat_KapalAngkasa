@@ -11,21 +11,21 @@
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-   <ImageView fitHeight="211.0" fitWidth="533.0" pickOnBounds="true" preserveRatio="true">
+   <ImageView fitHeight="211.0" fitWidth="533.0" pickOnBounds="true" preserveRatio="true" smooth="false">
       <image>
          <Image url="@assets/logo.png" />
       </image>
    </ImageView>
-    <Button fx:id="playButton" onAction="#handlePlayGame" prefHeight="83.0" prefWidth="111.0" style="-fx-background-color: transparent;" text="Play" textFill="WHITE">
+    <Button fx:id="playButton" onAction="#handlePlayGame" prefHeight="63.0" prefWidth="111.0" style="-fx-background-color: transparent;" text="Play" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font></Button>
-   <Button fx:id="recordButton" onAction="#handleRecordButton" prefHeight="75.0" prefWidth="157.0" style="-fx-background-color: transparen;" text="Record" textFill="WHITE">
+   <Button fx:id="recordButton" onAction="#handleRecordButton" prefHeight="51.0" prefWidth="157.0" style="-fx-background-color: transparen;" text="Record" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font>
    </Button>
-   <Button fx:id="exitButton" onAction="#handleExit" prefHeight="45.0" prefWidth="101.0" style="-fx-background-color: transparen;" text="Exit" textFill="WHITE">
+   <Button fx:id="exitButton" onAction="#handleExit" prefHeight="50.0" prefWidth="147.0" style="-fx-background-color: transparen;" text="Exit" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font>
