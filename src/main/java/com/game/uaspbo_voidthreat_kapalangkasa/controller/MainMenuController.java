@@ -39,7 +39,7 @@ public class MainMenuController {
             //Game Stage
             Stage gameStage = new Stage();
             gameStage.setTitle("Void Threat");
-            gameStage.setMaximized(false);
+            gameStage.setMaximized(true);
             GameController gameController = new GameController(playerName);
 
             gameController.start(gameStage);

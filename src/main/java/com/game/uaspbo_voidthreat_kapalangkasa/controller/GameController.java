@@ -23,6 +23,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode; // Import KeyCode
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
 
 public class GameController {
 
@@ -33,8 +35,8 @@ public class GameController {
 
     //variables
     private static final Random RAND = new Random();
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
+    private static int WIDTH;
+    private static int HEIGHT;
     private static final int PLAYER_SIZE = 60;
 
     static final Image PLAYER_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihrocket.png").toExternalForm());
@@ -81,6 +83,11 @@ public class GameController {
 
     /* Start Game */
     public void start(Stage stage) throws Exception {
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        WIDTH = (int) primaryScreenBounds.getWidth();
+        HEIGHT = (int) primaryScreenBounds.getHeight();
+
+
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
 
@@ -152,7 +159,7 @@ public class GameController {
         setup();
         stage.setScene(scene);
         stage.setTitle("Void Threat");
-        stage.setMaximized(false); // Ensure it's windowed, not maximized
+        stage.setMaximized(true); // Ensure it's windowed, not maximized
         stage.show();
 
         // Request focus for the scene so it can receive keyboard events
@@ -164,7 +171,7 @@ public class GameController {
         univ = new ArrayList<>();
         shots = new ArrayList<>();
         Bombs = new ArrayList<>();
-        player = new Rocket(WIDTH / 2.0, HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_IMG);
+        player = new Rocket(WIDTH / 2.0, HEIGHT - 85, PLAYER_SIZE, PLAYER_IMG);
         score = 0;
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
 
@@ -181,10 +188,11 @@ public class GameController {
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
-        gc.setFont(Font.font(20));
+        gc.setFont(Font.font(30));
         gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + score, 60,  20);
+        gc.fillText("Score: " + score, 75,  40);
 
+        player.posX = (int) mouseX;
 
         // --- KEY CHANGE HERE ---
         // Only update game logic if game is NOT over and NOT paused
@@ -339,7 +347,8 @@ public class GameController {
         public void update(double deltaTime){
             super.update(deltaTime);
             // Bom berhenti bergerak jika game over atau paused
-            if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
+//            if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
+            if(!exploding && !destroyed) posY += getSpeed() * deltaTime;
             if(posY > HEIGHT) destroyed = true;
         }
     }
@@ -448,7 +457,7 @@ public class GameController {
                 Stage stage = new Stage();
                 stage.setTitle("Void Threat");
                 stage.setScene(new Scene(root));
-                stage.setMaximized(false); // Ensure main menu is windowed
+                stage.setMaximized(true); // Ensure main menu is windowed
                 stage.show();
 
                 currentStage.close();
