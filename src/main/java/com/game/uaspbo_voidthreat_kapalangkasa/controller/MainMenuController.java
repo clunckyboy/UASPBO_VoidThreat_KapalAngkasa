@@ -31,21 +31,25 @@ public class MainMenuController {
             Optional<String> result = dialog.showAndWait();
             if (result.isPresent()) {
                 playerName = result.get();
+
+                // Pindahkan seluruh logika peluncuran game ke dalam blok ini
+                BorderPane root = new BorderPane();
+                Scene scene = new Scene(root, 400,400);
+
+                //Game Stage
+                Stage gameStage = new Stage();
+                gameStage.setTitle("Void Threat");
+                gameStage.setMaximized(false);
+                GameController gameController = new GameController(playerName);
+
+                gameController.start(gameStage);
+
+                Stage currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+                currentStage.close();
             }
+            // Jika result.isPresent() false (cancel ditekan), tidak ada yang terjadi,
+            // dan aplikasi tetap di Main Menu.
 
-            BorderPane root = new BorderPane();
-            Scene scene = new Scene(root, 400,400);
-
-            //Game Stage
-            Stage gameStage = new Stage();
-            gameStage.setTitle("Void Threat");
-            gameStage.setMaximized(true);
-            GameController gameController = new GameController(playerName);
-
-            gameController.start(gameStage);
-
-            Stage currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
-            currentStage.close();
         } catch(Exception e){
             e.printStackTrace();
         }
