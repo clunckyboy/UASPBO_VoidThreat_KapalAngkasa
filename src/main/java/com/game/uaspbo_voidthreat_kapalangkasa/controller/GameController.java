@@ -38,6 +38,9 @@ public class GameController {
     private static int WIDTH;
     private static int HEIGHT;
     private static final int PLAYER_SIZE = 60;
+    // --- NEW --- Define a larger size for the mega rocket
+    private static final int MEGADIHROCKET_SIZE = 120;
+
 
     static final Image PLAYER_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihrocket.png").toExternalForm());
     static final Image EXPLOSION_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihplosion.png").toExternalForm());
@@ -52,13 +55,8 @@ public class GameController {
             new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihroids.png").toExternalForm()),
             new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/dihazard1.png").toExternalForm()),
             new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/dihazard2.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/4.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/5.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/6.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/7.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/8.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/9.png").toExternalForm()),
-            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/10.png").toExternalForm())
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/dihroids2.png").toExternalForm()),
+            new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/megadihrocket.png").toExternalForm()),
     };
 
     final int MAX_BOMBS = 10, MAX_SHOTS = MAX_BOMBS * 2;
@@ -475,9 +473,18 @@ public class GameController {
         }
     }
 
+    // --- MODIFIED ---
     Bomb newBomb() {
-        return new Bomb(50 + RAND.nextInt(WIDTH - 100), 0, PLAYER_SIZE,
-                BOMBS_IMG[RAND.nextInt(BOMBS_IMG.length)]);
+        int bombTypeIndex = RAND.nextInt(BOMBS_IMG.length);
+        Image bombImage = BOMBS_IMG[bombTypeIndex];
+        int bombSize = PLAYER_SIZE; // Default size
+
+        // Check if the bomb is the 'megadihrocket'
+        if (bombTypeIndex == BOMBS_IMG.length - 1) { // Last image in the array
+            bombSize = MEGADIHROCKET_SIZE;
+        }
+
+        return new Bomb(50 + RAND.nextInt(WIDTH - 100), 0, bombSize, bombImage);
     }
 
     double distanceSq(double x1, double y1, double x2, double y2){
