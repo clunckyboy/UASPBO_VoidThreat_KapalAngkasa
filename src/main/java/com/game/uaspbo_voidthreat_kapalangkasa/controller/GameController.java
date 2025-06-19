@@ -74,6 +74,9 @@ public class GameController {
     private int score;
     private long lastFrameTime; // For Delta Time calculation
 
+    // *** NEW VARIABLE *** to track if the special sound has been played
+    private boolean wasInSpecialShotMode = false;
+
     // Variables for keyboard control
     private boolean goLeft, goRight, shootPressed;
     private final double PLAYER_SPEED = 200; // Kecepatan pergerakan pemain (pixels per second)
@@ -91,7 +94,6 @@ public class GameController {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
 
-        // --- CHANGE HERE: ADD THIS LINE TO ENABLE NEAREST NEIGHBOR SCALING ---
         gc.setImageSmoothing(false);
 
         lastFrameTime = System.nanoTime();
@@ -105,8 +107,8 @@ public class GameController {
         };
         gameLoop.start();
 
-        StackPane rootPane = new StackPane(canvas); // Gunakan StackPane sebagai root untuk scene
-        Scene scene = new Scene(rootPane); // Scene dibuat dengan rootPane
+        StackPane rootPane = new StackPane(canvas);
+        Scene scene = new Scene(rootPane);
 
         canvas.setCursor(Cursor.MOVE);
         canvas.setOnMouseMoved(e -> mouseX = e.getX());
@@ -118,7 +120,6 @@ public class GameController {
             } else if (e.getCode() == KeyCode.D || e.getCode() == KeyCode.RIGHT) {
                 goRight = true;
             } else if (e.getCode() == KeyCode.W || e.getCode() == KeyCode.SPACE) {
-                // Only shoot if not paused and not game over
                 if (!gameOver && !paused) {
                     shootPressed = true;
                     if (shots.size() < MAX_SHOTS) {
@@ -126,8 +127,8 @@ public class GameController {
                         SoundManager.playSound("sfx1.wav");
                     }
                 }
-            } else if (e.getCode() == KeyCode.P) { // Toggle pause with 'P' key
-                if (!gameOver) { // Cannot pause if game is over
+            } else if (e.getCode() == KeyCode.P) {
+                if (!gameOver) {
                     paused = !paused;
                 }
             }
@@ -145,13 +146,11 @@ public class GameController {
 
 
         canvas.setOnMouseClicked(e -> {
-            // Mouse click for shooting (if still desired, otherwise comment out)
-            if(!gameOver && !player.exploding && !paused) { // Only allow shooting if not game over, not exploding, AND not paused
+            if(!gameOver && !player.exploding && !paused) {
                 if(shots.size() < MAX_SHOTS)
                     shots.add(player.shoot()); SoundManager.playSound("sfx1.wav");
             }
 
-            // Mouse click to go back to main menu ONLY if game is over
             if(gameOver) {
                 gameLoop.stop();
                 saveScoreToDatabase();
@@ -162,10 +161,9 @@ public class GameController {
         setup();
         stage.setScene(scene);
         stage.setTitle("Void Threat");
-        stage.setMaximized(true); // Ensure it's windowed, not maximized
+        stage.setMaximized(true);
         stage.show();
 
-        // Request focus for the scene so it can receive keyboard events
         scene.getRoot().requestFocus();
     }
 
@@ -178,16 +176,15 @@ public class GameController {
         score = 0;
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
 
-        // Reset keyboard and pause states
         goLeft = false;
         goRight = false;
         shootPressed = false;
-        paused = false; // Ensure game starts unpaused
+        paused = false;
+        wasInSpecialShotMode = false; // Reset the flag on setup
     }
 
     /*Run Graphics*/
     private void run(GraphicsContext gc, double deltaTime) {
-        // Always draw the background and game elements
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
@@ -197,29 +194,16 @@ public class GameController {
 
         player.posX = (int) mouseX;
 
-        // --- KEY CHANGE HERE ---
-        // Only update game logic if game is NOT over and NOT paused
         if(!gameOver && !paused) {
-            univ.forEach(u -> u.draw(deltaTime)); // Bintang terus bergerak
+            univ.forEach(u -> u.draw(deltaTime));
             player.update(deltaTime);
-            player.draw(); // Pemain tetap digambar
+            player.draw();
 
-            // Update player position based on keyboard input
-            if (goLeft) {
-                player.posX -= PLAYER_SPEED * deltaTime;
-            }
-            if (goRight) {
-                player.posX += PLAYER_SPEED * deltaTime;
-            }
+            if (goLeft) player.posX -= PLAYER_SPEED * deltaTime;
+            if (goRight) player.posX += PLAYER_SPEED * deltaTime;
 
-            // Clamp player position to stay within bounds
-            if (player.posX < 0) {
-                player.posX = 0;
-            }
-            if (player.posX > WIDTH - PLAYER_SIZE) {
-                player.posX = WIDTH - PLAYER_SIZE;
-            }
-
+            if (player.posX < 0) player.posX = 0;
+            if (player.posX > WIDTH - PLAYER_SIZE) player.posX = WIDTH - PLAYER_SIZE;
 
             Bombs.stream().peek(bomb -> bomb.update(deltaTime)).peek(Rocket::draw).forEach(e -> {
                 if(player.colide(e) && !player.exploding) {
@@ -252,6 +236,17 @@ public class GameController {
                 }
             }
 
+            // --- MODIFIED LOGIC ---
+            // This logic is now handled in the main game loop, not per-bullet.
+            boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
+            if (isInSpecialShotMode && !wasInSpecialShotMode) {
+                // If we JUST entered the special mode, play the sound.
+                SoundManager.playSound("sfx4.wav");
+            }
+            // Update the state for the next frame.
+            this.wasInSpecialShotMode = isInSpecialShotMode;
+            // --- END OF MODIFICATION ---
+
             gameOver = player.destroyed;
             if(RAND.nextInt(10) > 2) {
                 univ.add(new Universe());
@@ -261,20 +256,18 @@ public class GameController {
                 if(univ.get(i).posY > HEIGHT)
                     univ.remove(i);
             }
-        } else { // If game is paused or game over, still draw existing elements
-            univ.forEach(u -> u.draw(deltaTime)); // Keep drawing stars
-            player.draw(); // Draw player at its last position
-            Bombs.forEach(Rocket::draw); // Draw bombs at their last positions
-            shots.forEach(Shot::draw); // Draw shots at their last positions
+        } else {
+            univ.forEach(u -> u.draw(deltaTime));
+            player.draw();
+            Bombs.forEach(Rocket::draw);
+            shots.forEach(Shot::draw);
         }
 
-
-        // Always draw game over message if game is over
         if(gameOver) {
             gc.setFont(Font.font(35));
             gc.setFill(Color.YELLOW);
             gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT /2.5);
-        } else if (paused) { // Display paused message if game is paused
+        } else if (paused) {
             gc.setFont(Font.font(40));
             gc.setFill(Color.CYAN);
             gc.fillText("PAUSED", WIDTH / 2, HEIGHT / 2);
@@ -289,7 +282,7 @@ public class GameController {
         Image img;
 
         private double explosionTimer = 0;
-        private static final double EXPLOSION_DURATION = 0.7; // e.g., 0.7 seconds total duration
+        private static final double EXPLOSION_DURATION = 0.7;
 
 
         public Rocket(double posX, double posY, int size, Image image){
@@ -349,9 +342,7 @@ public class GameController {
 
         public void update(double deltaTime){
             super.update(deltaTime);
-            // Bom berhenti bergerak jika game over atau paused
-//            if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
-            if(!exploding && !destroyed) posY += getSpeed() * deltaTime;
+            if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
             if(posY > HEIGHT) destroyed = true;
         }
     }
@@ -360,8 +351,8 @@ public class GameController {
     public class Shot {
         public boolean toRemove;
         double posX, posY;
-        double speed = 100; // 10 pixels/frame at 10fps -> 100 pixels/second
-        double specialSpeed = 500; // A faster speed for the power-up
+        double speed = 100;
+        double specialSpeed = 500;
         static final int size = 6;
 
         public Shot(double posX, double posY) {
@@ -370,11 +361,14 @@ public class GameController {
         }
 
         public void update(double deltaTime){
-            // Peluru berhenti bergerak jika game over atau paused
             if (!gameOver && !paused) {
                 double currentSpeed = speed;
+                // --- MODIFIED LOGIC ---
+                // The bullet only needs to know if it should be fast.
+                // It is no longer responsible for playing the sound.
                 if (score >= 50 && score <= 70 || score >= 120) {
                     currentSpeed = specialSpeed;
+                    // SoundManager.playSound("sfx4.wav"); // <-- REMOVED FROM HERE
                 }
                 posY -= currentSpeed * deltaTime;
             }
@@ -402,7 +396,7 @@ public class GameController {
         double posX, posY;
         private int h,w,r,g,b;
         private double opacity;
-        private final double speed = 200; // 20 pixels/frame at 10fps -> 200 pixels/second
+        private final double speed = 200;
 
         public Universe(){
             posX = RAND.nextInt(WIDTH);
@@ -418,7 +412,6 @@ public class GameController {
         }
 
         public void draw(double deltaTime){
-            // Bintang terus bergerak bahkan saat game over atau paused untuk latar belakang
             if(opacity > 0.8) opacity -= 0.01;
             if(opacity < 0.1) opacity += 0.01;
             gc.setFill(Color.rgb(r,g,b,opacity));
@@ -460,7 +453,7 @@ public class GameController {
                 Stage stage = new Stage();
                 stage.setTitle("Void Threat");
                 stage.setScene(new Scene(root));
-                stage.setMaximized(true); // Ensure main menu is windowed
+                stage.setMaximized(true);
                 stage.show();
 
                 currentStage.close();
