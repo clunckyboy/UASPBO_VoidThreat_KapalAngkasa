@@ -8,6 +8,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextInputDialog;
+// Import ImageView if you were to use it here. For now, it's not needed in this file.
+// import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -40,6 +42,25 @@ public class MainMenuController {
                 Stage gameStage = new Stage();
                 gameStage.setTitle("Void Threat");
                 gameStage.setMaximized(false);
+
+                // =================================================================================
+                // IMPORTANT: CHANGE REQUIRED IN YOUR GameController.java
+                //
+                // Image smoothing must be disabled inside your GameController, where your
+                // game's sprites (player, enemies, etc.) are created as ImageView objects.
+                // You cannot set it from this MainMenuController file.
+                //
+                // Find the code in GameController.java where you create your ImageViews
+                // and add the .setSmooth(false) method call.
+                //
+                // EXAMPLE (to be placed inside GameController.java):
+                //
+                // ImageView playerSprite = new ImageView(yourPlayerImage);
+                // playerSprite.setSmooth(false); // <-- ADD THIS LINE FOR EACH SPRITE
+                //
+                // ImageView enemySprite = new ImageView(yourEnemyImage);
+                // enemySprite.setSmooth(false); // <-- AND THIS ONE
+                // =================================================================================
                 GameController gameController = new GameController(playerName);
 
                 gameController.start(gameStage);

@@ -91,6 +91,9 @@ public class GameController {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
 
+        // --- CHANGE HERE: ADD THIS LINE TO ENABLE NEAREST NEIGHBOR SCALING ---
+        gc.setImageSmoothing(false);
+
         lastFrameTime = System.nanoTime();
         AnimationTimer gameLoop = new AnimationTimer() {
             @Override
