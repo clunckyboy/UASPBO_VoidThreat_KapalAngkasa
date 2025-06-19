@@ -209,11 +209,32 @@ public class GameController {
 
         player.posX = (int) mouseX;
 
+        // Always update and draw universe
+        univ.forEach(u -> u.draw(deltaTime));
+        for (int i = univ.size() - 1; i >= 0; i--) {
+            if(univ.get(i).posY > HEIGHT)
+                univ.remove(i);
+        }
+        if(RAND.nextInt(10) > 2) {
+            univ.add(new Universe());
+        }
+
+        // Always update bombs
+        Bombs.forEach(bomb -> bomb.update(deltaTime));
+
+        // Always replace destroyed bombs
+        for (int i = Bombs.size() - 1; i >= 0; i--){
+            if(Bombs.get(i).destroyed)  {
+                Bombs.set(i, newBomb());
+            }
+        }
+
+
         if(!gameOver && !paused) {
-            univ.forEach(u -> u.draw(deltaTime));
+            // Player specific updates
             player.update(deltaTime);
 
-            // Handle invulnerability
+            // Handle invulnerability (player specific)
             if (invulnerable) {
                 invulnerableTimer += deltaTime;
                 if (invulnerableTimer >= INVULNERABILITY_DURATION) {
@@ -235,8 +256,9 @@ public class GameController {
             if (player.posX < 0) player.posX = 0;
             if (player.posX > WIDTH - PLAYER_SIZE) player.posX = WIDTH - PLAYER_SIZE;
 
-            Bombs.stream().peek(bomb -> bomb.update(deltaTime)).peek(Rocket::draw).forEach(e -> {
-                if(player.colide(e) && !player.exploding && !invulnerable) { // Check invulnerability
+            // Collision of player with bombs
+            Bombs.forEach(bomb -> {
+                if(player.colide(bomb) && !player.exploding && !invulnerable) { // Check invulnerability
                     SoundManager.playSound("sfx3.wav");
                     player.explode();
                     lives--; // Decrement lives
@@ -272,12 +294,6 @@ public class GameController {
                 }
             }
 
-            for (int i = Bombs.size() - 1; i >= 0; i--){
-                if(Bombs.get(i).destroyed)  {
-                    Bombs.set(i, newBomb());
-                }
-            }
-
             // This logic is now handled in the main game loop, not per-bullet.
             boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
             if (isInSpecialShotMode && !wasInSpecialShotMode) {
@@ -287,23 +303,18 @@ public class GameController {
             // Update the state for the next frame.
             this.wasInSpecialShotMode = isInSpecialShotMode;
             // gameOver is now set based on lives <= 0
-            if(RAND.nextInt(10) > 2) {
-                univ.add(new Universe());
-            }
 
-            for (int i = univ.size() - 1; i >= 0; i--) {
-                if(univ.get(i).posY > HEIGHT)
-                    univ.remove(i);
-            }
         } else {
-            univ.forEach(u -> u.draw(deltaTime));
             // Only draw player if not in game over and not in flashing invulnerable state
             if (!gameOver && (!invulnerable || (int)(invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
                 player.draw();
             }
-            Bombs.forEach(Rocket::draw);
             shots.forEach(Shot::draw);
         }
+
+        // Always draw bombs (after they are updated, regardless of game state)
+        Bombs.forEach(Rocket::draw);
+
 
         if(gameOver) {
             gc.setFont(Font.font(35));
@@ -388,7 +399,7 @@ public class GameController {
 
         public void update(double deltaTime){
             super.update(deltaTime); // This will now correctly handle explosion-based 'destroyed'
-            if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
+            if(!exploding && !destroyed && !paused) posY += getSpeed() * deltaTime;
             if(posY > HEIGHT) destroyed = true; // Mark as destroyed if off-screen
         }
     }
