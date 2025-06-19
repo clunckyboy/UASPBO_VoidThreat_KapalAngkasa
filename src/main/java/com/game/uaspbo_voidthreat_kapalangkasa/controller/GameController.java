@@ -84,6 +84,15 @@ public class GameController {
     // New variable for pause state
     private boolean paused = false;
 
+    // --- NEW LIVES VARIABLES ---
+    private int lives;
+    private boolean invulnerable;
+    private double invulnerableTimer;
+    private static final double INVULNERABILITY_DURATION = 2.0; // 2 seconds of invulnerability
+    private static final double RESPAWN_FLASH_INTERVAL = 0.1; // Flash every 0.1 seconds
+    // --- END NEW LIVES VARIABLES ---
+
+
     /* Start Game */
     public void start(Stage stage) throws Exception {
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -174,6 +183,10 @@ public class GameController {
         Bombs = new ArrayList<>();
         player = new Rocket(WIDTH / 2.0, HEIGHT - 85, PLAYER_SIZE, PLAYER_IMG);
         score = 0;
+        lives = 3; // Initialize lives to 3
+        invulnerable = false; // Player not invulnerable at start
+        invulnerableTimer = 0; // Reset invulnerability timer
+
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
 
         goLeft = false;
@@ -181,6 +194,7 @@ public class GameController {
         shootPressed = false;
         paused = false;
         wasInSpecialShotMode = false; // Reset the flag on setup
+        gameOver = false; // Reset game over state
     }
 
     /*Run Graphics*/
@@ -191,13 +205,29 @@ public class GameController {
         gc.setFont(Font.font(30));
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 75,  40);
+        gc.fillText("Lives: " + lives, 75, 80); // Display lives
 
         player.posX = (int) mouseX;
 
         if(!gameOver && !paused) {
             univ.forEach(u -> u.draw(deltaTime));
             player.update(deltaTime);
-            player.draw();
+
+            // Handle invulnerability
+            if (invulnerable) {
+                invulnerableTimer += deltaTime;
+                if (invulnerableTimer >= INVULNERABILITY_DURATION) {
+                    invulnerable = false;
+                    invulnerableTimer = 0;
+                }
+                // Flashing effect for invulnerability
+                if ((int)(invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0) {
+                    player.draw(); // Draw player only on alternate flashes
+                }
+            } else {
+                player.draw();
+            }
+
 
             if (goLeft) player.posX -= PLAYER_SPEED * deltaTime;
             if (goRight) player.posX += PLAYER_SPEED * deltaTime;
@@ -206,9 +236,21 @@ public class GameController {
             if (player.posX > WIDTH - PLAYER_SIZE) player.posX = WIDTH - PLAYER_SIZE;
 
             Bombs.stream().peek(bomb -> bomb.update(deltaTime)).peek(Rocket::draw).forEach(e -> {
-                if(player.colide(e) && !player.exploding) {
+                if(player.colide(e) && !player.exploding && !invulnerable) { // Check invulnerability
                     SoundManager.playSound("sfx3.wav");
                     player.explode();
+                    lives--; // Decrement lives
+                    if (lives <= 0) {
+                        gameOver = true;
+                    } else {
+                        // Respawn effect
+                        invulnerable = true;
+                        invulnerableTimer = 0;
+                        player.posX = WIDTH / 2.0; // Reset player position
+                        player.posY = HEIGHT - 85;
+                        player.exploding = false; // Stop explosion effect on respawn
+                        player.destroyed = false; // Player is not destroyed if lives remain
+                    }
                 }
             });
 
@@ -236,7 +278,6 @@ public class GameController {
                 }
             }
 
-            // --- MODIFIED LOGIC ---
             // This logic is now handled in the main game loop, not per-bullet.
             boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
             if (isInSpecialShotMode && !wasInSpecialShotMode) {
@@ -245,9 +286,7 @@ public class GameController {
             }
             // Update the state for the next frame.
             this.wasInSpecialShotMode = isInSpecialShotMode;
-            // --- END OF MODIFICATION ---
-
-            gameOver = player.destroyed;
+            // gameOver is now set based on lives <= 0
             if(RAND.nextInt(10) > 2) {
                 univ.add(new Universe());
             }
@@ -258,7 +297,10 @@ public class GameController {
             }
         } else {
             univ.forEach(u -> u.draw(deltaTime));
-            player.draw();
+            // Only draw player if not in game over and not in flashing invulnerable state
+            if (!gameOver && (!invulnerable || (int)(invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
+                player.draw();
+            }
             Bombs.forEach(Rocket::draw);
             shots.forEach(Shot::draw);
         }
@@ -299,8 +341,12 @@ public class GameController {
         public void update(double deltaTime){
             if (exploding) {
                 explosionTimer += deltaTime;
+                // Corrected: Mark as destroyed once explosion animation is complete
+                if (explosionTimer >= EXPLOSION_DURATION) {
+                    destroyed = true;
+                }
             }
-            destroyed = explosionTimer > EXPLOSION_DURATION;
+            // Removed: player-specific 'destroyed' logic from here
         }
 
         public void draw(){
@@ -341,9 +387,9 @@ public class GameController {
         }
 
         public void update(double deltaTime){
-            super.update(deltaTime);
+            super.update(deltaTime); // This will now correctly handle explosion-based 'destroyed'
             if(!exploding && !destroyed && !gameOver && !paused) posY += getSpeed() * deltaTime;
-            if(posY > HEIGHT) destroyed = true;
+            if(posY > HEIGHT) destroyed = true; // Mark as destroyed if off-screen
         }
     }
 
@@ -363,12 +409,10 @@ public class GameController {
         public void update(double deltaTime){
             if (!gameOver && !paused) {
                 double currentSpeed = speed;
-                // --- MODIFIED LOGIC ---
                 // The bullet only needs to know if it should be fast.
                 // It is no longer responsible for playing the sound.
                 if (score >= 50 && score <= 70 || score >= 120) {
                     currentSpeed = specialSpeed;
-                    // SoundManager.playSound("sfx4.wav"); // <-- REMOVED FROM HERE
                 }
                 posY -= currentSpeed * deltaTime;
             }
