@@ -8,7 +8,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,13 +21,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import javafx.scene.input.KeyCode; // Import KeyCode
+import javafx.scene.input.KeyCode;
 import javafx.stage.Screen;
 import javafx.geometry.Rectangle2D;
 
 public class GameController {
 
     private String playerName;
+
     public GameController(String playerName) {
         this.playerName = playerName;
     }
@@ -38,9 +38,7 @@ public class GameController {
     private static int WIDTH;
     private static int HEIGHT;
     private static final int PLAYER_SIZE = 60;
-    // --- NEW --- Define a larger size for the mega rocket
     private static final int MEGADIHROCKET_SIZE = 120;
-
 
     static final Image PLAYER_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihrocket.png").toExternalForm());
     static final Image EXPLOSION_IMG = new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihplosion.png").toExternalForm());
@@ -70,33 +68,26 @@ public class GameController {
 
     private double mouseX;
     private int score;
-    private long lastFrameTime; // For Delta Time calculation
+    private long lastFrameTime;
 
-    // *** NEW VARIABLE *** to track if the special sound has been played
     private boolean wasInSpecialShotMode = false;
-
-    // Variables for keyboard control
     private boolean goLeft, goRight, shootPressed;
-    private final double PLAYER_SPEED = 200; // Kecepatan pergerakan pemain (pixels per second)
-
-    // New variable for pause state
+    private final double PLAYER_SPEED = 200;
     private boolean paused = false;
-
-    // --- NEW LIVES VARIABLES ---
     private int lives;
     private boolean invulnerable;
     private double invulnerableTimer;
-    private static final double INVULNERABILITY_DURATION = 2.0; // 2 seconds of invulnerability
-    private static final double RESPAWN_FLASH_INTERVAL = 0.1; // Flash every 0.1 seconds
-    // --- END NEW LIVES VARIABLES ---
+    private static final double INVULNERABILITY_DURATION = 2.0;
+    private static final double RESPAWN_FLASH_INTERVAL = 0.1;
 
+    // Instance of SoundManager for BGM control
+    private SoundManager soundManager;
 
     /* Start Game */
     public void start(Stage stage) throws Exception {
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         WIDTH = (int) primaryScreenBounds.getWidth();
         HEIGHT = (int) primaryScreenBounds.getHeight();
-
 
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
@@ -120,7 +111,6 @@ public class GameController {
         canvas.setCursor(Cursor.MOVE);
         canvas.setOnMouseMoved(e -> mouseX = e.getX());
 
-        // Handle keyboard input
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.A || e.getCode() == KeyCode.LEFT) {
                 goLeft = true;
@@ -151,15 +141,16 @@ public class GameController {
             }
         });
 
-
         canvas.setOnMouseClicked(e -> {
-            if(!gameOver && !player.exploding && !paused) {
-                if(shots.size() < MAX_SHOTS)
-                    shots.add(player.shoot()); SoundManager.playSound("sfx1.wav");
+            if (!gameOver && !player.exploding && !paused) {
+                if (shots.size() < MAX_SHOTS)
+                    shots.add(player.shoot());
+                SoundManager.playSound("sfx1.wav");
             }
 
-            if(gameOver) {
+            if (gameOver) {
                 gameLoop.stop();
+                soundManager.stopMusic();
                 saveScoreToDatabase();
                 backToMainMenu(stage);
             }
@@ -174,16 +165,17 @@ public class GameController {
         scene.getRoot().requestFocus();
     }
 
-    //setup the game
     private void setup() {
+        soundManager = new SoundManager();
+
         univ = new ArrayList<>();
         shots = new ArrayList<>();
         Bombs = new ArrayList<>();
         player = new Rocket(WIDTH / 2.0, HEIGHT - 85, PLAYER_SIZE, PLAYER_IMG);
         score = 0;
-        lives = 3; // Initialize lives to 3
-        invulnerable = false; // Player not invulnerable at start
-        invulnerableTimer = 0; // Reset invulnerability timer
+        lives = 3;
+        invulnerable = false;
+        invulnerableTimer = 0;
 
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
 
@@ -191,62 +183,55 @@ public class GameController {
         goRight = false;
         shootPressed = false;
         paused = false;
-        wasInSpecialShotMode = false; // Reset the flag on setup
-        gameOver = false; // Reset game over state
+        wasInSpecialShotMode = false;
+        gameOver = false;
+
+        soundManager.playIntroThenLoop("bgm2.wav", "bgm1.wav");
     }
 
-    /*Run Graphics*/
     private void run(GraphicsContext gc, double deltaTime) {
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setFont(Font.font(30));
         gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + score, 75,  40);
-        gc.fillText("Lives: " + lives, 75, 80); // Display lives
+        gc.fillText("Score: " + score, 75, 40);
+        gc.fillText("Lives: " + lives, 75, 80);
 
         player.posX = (int) mouseX;
 
-        // Always update and draw universe
         univ.forEach(u -> u.draw(deltaTime));
         for (int i = univ.size() - 1; i >= 0; i--) {
-            if(univ.get(i).posY > HEIGHT)
+            if (univ.get(i).posY > HEIGHT)
                 univ.remove(i);
         }
-        if(RAND.nextInt(10) > 2) {
+        if (RAND.nextInt(10) > 2) {
             univ.add(new Universe());
         }
 
-        // Always update bombs
         Bombs.forEach(bomb -> bomb.update(deltaTime));
 
-        // Always replace destroyed bombs
-        for (int i = Bombs.size() - 1; i >= 0; i--){
-            if(Bombs.get(i).destroyed)  {
+        for (int i = Bombs.size() - 1; i >= 0; i--) {
+            if (Bombs.get(i).destroyed) {
                 Bombs.set(i, newBomb());
             }
         }
 
-
-        if(!gameOver && !paused) {
-            // Player specific updates
+        if (!gameOver && !paused) {
             player.update(deltaTime);
 
-            // Handle invulnerability (player specific)
             if (invulnerable) {
                 invulnerableTimer += deltaTime;
                 if (invulnerableTimer >= INVULNERABILITY_DURATION) {
                     invulnerable = false;
                     invulnerableTimer = 0;
                 }
-                // Flashing effect for invulnerability
-                if ((int)(invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0) {
-                    player.draw(); // Draw player only on alternate flashes
+                if ((int) (invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0) {
+                    player.draw();
                 }
             } else {
                 player.draw();
             }
-
 
             if (goLeft) player.posX -= PLAYER_SPEED * deltaTime;
             if (goRight) player.posX += PLAYER_SPEED * deltaTime;
@@ -254,36 +239,35 @@ public class GameController {
             if (player.posX < 0) player.posX = 0;
             if (player.posX > WIDTH - PLAYER_SIZE) player.posX = WIDTH - PLAYER_SIZE;
 
-            // Collision of player with bombs
             Bombs.forEach(bomb -> {
-                if(player.colide(bomb) && !player.exploding && !invulnerable) { // Check invulnerability
+                if (player.colide(bomb) && !player.exploding && !invulnerable) {
                     SoundManager.playSound("sfx3.wav");
                     player.explode();
-                    lives--; // Decrement lives
+                    lives--;
                     if (lives <= 0) {
                         gameOver = true;
+                        soundManager.stopMusic();
                     } else {
-                        // Respawn effect
                         invulnerable = true;
                         invulnerableTimer = 0;
-                        player.posX = WIDTH / 2.0; // Reset player position
+                        player.posX = WIDTH / 2.0;
                         player.posY = HEIGHT - 85;
-                        player.exploding = false; // Stop explosion effect on respawn
-                        player.destroyed = false; // Player is not destroyed if lives remain
+                        player.exploding = false;
+                        player.destroyed = false;
                     }
                 }
             });
 
-            for (int i = shots.size() - 1; i >=0 ; i--) {
+            for (int i = shots.size() - 1; i >= 0; i--) {
                 Shot shot = shots.get(i);
-                if(shot.posY < 0 || shot.toRemove)  {
+                if (shot.posY < 0 || shot.toRemove) {
                     shots.remove(i);
                     continue;
                 }
                 shot.update(deltaTime);
                 shot.draw();
                 for (Bomb bomb : Bombs) {
-                    if(shot.colide(bomb) && !bomb.exploding) {
+                    if (shot.colide(bomb) && !bomb.exploding) {
                         score++;
                         SoundManager.playSound("sfx2.wav");
                         bomb.explode();
@@ -292,32 +276,25 @@ public class GameController {
                 }
             }
 
-            // This logic is now handled in the main game loop, not per-bullet.
             boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
             if (isInSpecialShotMode && !wasInSpecialShotMode) {
-                // If we JUST entered the special mode, play the sound.
                 SoundManager.playSound("sfx4.wav");
             }
-            // Update the state for the next frame.
             this.wasInSpecialShotMode = isInSpecialShotMode;
-            // gameOver is now set based on lives <= 0
 
         } else {
-            // Only draw player if not in game over and not in flashing invulnerable state
-            if (!gameOver && (!invulnerable || (int)(invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
+            if (!gameOver && (!invulnerable || (int) (invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
                 player.draw();
             }
             shots.forEach(Shot::draw);
         }
 
-        // Always draw bombs (after they are updated, regardless of game state)
         Bombs.forEach(Rocket::draw);
 
-
-        if(gameOver) {
+        if (gameOver) {
             gc.setFont(Font.font(35));
             gc.setFill(Color.YELLOW);
-            gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT /2.5);
+            gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT / 2.5);
         } else if (paused) {
             gc.setFont(Font.font(40));
             gc.setFill(Color.CYAN);
@@ -325,7 +302,6 @@ public class GameController {
         }
     }
 
-    /* Player */
     public class Rocket {
         double posX, posY;
         int size;
@@ -335,32 +311,29 @@ public class GameController {
         private double explosionTimer = 0;
         private static final double EXPLOSION_DURATION = 0.7;
 
-
-        public Rocket(double posX, double posY, int size, Image image){
+        public Rocket(double posX, double posY, int size, Image image) {
             this.posX = posX;
             this.posY = posY;
             this.size = size;
             img = image;
         }
 
-        public Shot shoot(){
+        public Shot shoot() {
             return new Shot(posX + size / 2.0 - Shot.size / 2.0, posY - Shot.size);
         }
 
-        public void update(double deltaTime){
+        public void update(double deltaTime) {
             if (exploding) {
                 explosionTimer += deltaTime;
-                // Corrected: Mark as destroyed once explosion animation is complete
                 if (explosionTimer >= EXPLOSION_DURATION) {
                     destroyed = true;
                 }
             }
-            // Removed: player-specific 'destroyed' logic from here
         }
 
-        public void draw(){
-            if(exploding){
-                int frame = (int)((explosionTimer / EXPLOSION_DURATION) * EXPLOSION_STEPS);
+        public void draw() {
+            if (exploding) {
+                int frame = (int) ((explosionTimer / EXPLOSION_DURATION) * EXPLOSION_STEPS);
 
                 if (frame >= EXPLOSION_STEPS) {
                     frame = EXPLOSION_STEPS - 1;
@@ -368,19 +341,19 @@ public class GameController {
 
                 gc.drawImage(EXPLOSION_IMG, frame % EXPLOSION_COL * EXPLOSION_W,
                         (frame / EXPLOSION_ROWS) * EXPLOSION_H + 1, EXPLOSION_W, EXPLOSION_H,
-                        (int)posX, (int)posY, size, size);
+                        (int) posX, (int) posY, size, size);
             } else {
-                gc.drawImage(img, (int)posX, (int)posY, size, size);
+                gc.drawImage(img, (int) posX, (int) posY, size, size);
             }
         }
 
-        public boolean colide(Rocket other){
-            int r = this.size / 2 + other.size / 2;
+        public boolean colide(Rocket other) {
+            double r = this.size / 2.0 + other.size / 2.0;
             return distanceSq(this.posX + size / 2.0, this.posY + size / 2.0,
                     other.posX + other.size / 2.0, other.posY + other.size / 2.0) < r * r;
         }
 
-        public void explode(){
+        public void explode() {
             exploding = true;
             explosionTimer = 0;
         }
@@ -391,18 +364,17 @@ public class GameController {
             return ((score / 5.0) + 2) * 20;
         }
 
-        public Bomb(double posX, double posY, int size, Image image){
-            super(posX,posY,size,image);
+        public Bomb(double posX, double posY, int size, Image image) {
+            super(posX, posY, size, image);
         }
 
-        public void update(double deltaTime){
-            super.update(deltaTime); // This will now correctly handle explosion-based 'destroyed'
-            if(!exploding && !destroyed && !paused) posY += getSpeed() * deltaTime;
-            if(posY > HEIGHT) destroyed = true; // Mark as destroyed if off-screen
+        public void update(double deltaTime) {
+            super.update(deltaTime);
+            if (!exploding && !destroyed && !paused) posY += getSpeed() * deltaTime;
+            if (posY > HEIGHT) destroyed = true;
         }
     }
 
-    /* Peluru */
     public class Shot {
         public boolean toRemove;
         double posX, posY;
@@ -415,11 +387,9 @@ public class GameController {
             this.posY = posY;
         }
 
-        public void update(double deltaTime){
+        public void update(double deltaTime) {
             if (!gameOver && !paused) {
                 double currentSpeed = speed;
-                // The bullet only needs to know if it should be fast.
-                // It is no longer responsible for playing the sound.
                 if (score >= 50 && score <= 70 || score >= 120) {
                     currentSpeed = specialSpeed;
                 }
@@ -427,31 +397,30 @@ public class GameController {
             }
         }
 
-        public void draw(){
+        public void draw() {
             gc.setFill(Color.RED);
-            if(score >= 50 && score <= 70 || score >= 120){
+            if (score >= 50 && score <= 70 || score >= 120) {
                 gc.setFill(Color.PEACHPUFF);
-                gc.fillRect((int)posX-5, (int)posY-10, size+10, size+30);
-            } else{
-                gc.fillOval((int)posX, (int)posY, size, size);
+                gc.fillRect((int) posX - 5, (int) posY - 10, size + 10, size + 30);
+            } else {
+                gc.fillOval((int) posX, (int) posY, size, size);
             }
         }
 
-        public boolean colide(Rocket Rocket){
-            int r = Rocket.size / 2 + size / 2;
+        public boolean colide(Rocket Rocket) {
+            double r = Rocket.size / 2.0 + size / 2.0;
             return distanceSq(this.posX + size / 2.0, this.posY + size / 2.0,
                     Rocket.posX + Rocket.size / 2.0, Rocket.posY + Rocket.size / 2.0) < r * r;
         }
     }
 
-    //environment
     public class Universe {
         double posX, posY;
-        private int h,w,r,g,b;
+        private int h, w, r, g, b;
         private double opacity;
         private final double speed = 200;
 
-        public Universe(){
+        public Universe() {
             posX = RAND.nextInt(WIDTH);
             posY = 0;
             w = RAND.nextInt(5) + 1;
@@ -460,38 +429,35 @@ public class GameController {
             g = RAND.nextInt(100) + 150;
             b = RAND.nextInt(100) + 150;
             opacity = RAND.nextFloat();
-            if(opacity < 0) opacity *= -1;
-            if(opacity > 0.5) opacity = 0.5;
+            if (opacity < 0) opacity *= -1;
+            if (opacity > 0.5) opacity = 0.5;
         }
 
-        public void draw(double deltaTime){
-            if(opacity > 0.8) opacity -= 0.01;
-            if(opacity < 0.1) opacity += 0.01;
-            gc.setFill(Color.rgb(r,g,b,opacity));
-            gc.fillOval((int)posX, (int)posY, w, h);
+        public void draw(double deltaTime) {
+            if (opacity > 0.8) opacity -= 0.01;
+            if (opacity < 0.1) opacity += 0.01;
+            gc.setFill(Color.rgb(r, g, b, opacity));
+            gc.fillOval((int) posX, (int) posY, w, h);
             posY += speed * deltaTime;
         }
     }
 
-    // --- MODIFIED ---
     Bomb newBomb() {
         int bombTypeIndex = RAND.nextInt(BOMBS_IMG.length);
         Image bombImage = BOMBS_IMG[bombTypeIndex];
-        int bombSize = PLAYER_SIZE; // Default size
+        int bombSize = PLAYER_SIZE;
 
-        // Check if the bomb is the 'megadihrocket'
-        if (bombTypeIndex == BOMBS_IMG.length - 1) { // Last image in the array
+        if (bombTypeIndex == BOMBS_IMG.length - 1) {
             bombSize = MEGADIHROCKET_SIZE;
         }
 
         return new Bomb(50 + RAND.nextInt(WIDTH - 100), 0, bombSize, bombImage);
     }
 
-    double distanceSq(double x1, double y1, double x2, double y2){
-        return Math.pow((x1-x2),2) + Math.pow((y1 - y2), 2);
+    double distanceSq(double x1, double y1, double x2, double y2) {
+        return Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2);
     }
 
-    /* Simpan skor ke database */
     private void saveScoreToDatabase() {
         try {
             Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/void_threat", "postgres", "12345678");
@@ -508,6 +474,10 @@ public class GameController {
     }
 
     private void backToMainMenu(Stage currentStage) {
+        if (soundManager != null) {
+            soundManager.stopMusic();
+        }
+
         Platform.runLater(() -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/uaspbo_voidthreat_kapalangkasa/MainMenu.fxml"));
