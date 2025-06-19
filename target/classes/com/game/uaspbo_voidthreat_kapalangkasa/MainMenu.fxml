@@ -15,17 +15,20 @@
       <image>
          <Image url="@assets/logo.png" />
       </image>
+      <VBox.margin>
+         <Insets bottom="30.0" />
+      </VBox.margin>
    </ImageView>
-    <Button fx:id="playButton" onAction="#handlePlayGame" prefHeight="63.0" prefWidth="111.0" style="-fx-background-color: transparent;" text="Play" textFill="WHITE">
+    <Button fx:id="playButton" onAction="#handlePlayGame" prefHeight="75.0" prefWidth="158.0" styleClass="button" stylesheets="@style.css" text="Play" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font></Button>
-   <Button fx:id="recordButton" onAction="#handleRecordButton" prefHeight="51.0" prefWidth="157.0" style="-fx-background-color: transparen;" text="Record" textFill="WHITE">
+   <Button fx:id="recordButton" onAction="#handleRecordButton" prefHeight="75.0" prefWidth="158.0" styleClass="button" stylesheets="@style.css" text="Record" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font>
    </Button>
-   <Button fx:id="exitButton" onAction="#handleExit" prefHeight="50.0" prefWidth="147.0" style="-fx-background-color: transparen;" text="Exit" textFill="WHITE">
+   <Button fx:id="exitButton" onAction="#handleExit" prefHeight="50.0" prefWidth="158.0" styleClass="button" stylesheets="@style.css" text="Exit" textFill="WHITE">
       <font>
          <Font size="35.0" />
       </font>

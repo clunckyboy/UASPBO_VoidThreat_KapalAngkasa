@@ -63,3 +63,20 @@
 .table-row-cell:filled:selected:hover {
     -fx-background-color: transparent;
 }
+
+.button {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+    -fx-font-family: "Press Start 2P";
+    -fx-font-size: 35;
+}
+
+.button:hover {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-font-family: "Press Start 2P";
+}
+
+.recButton{
+    -fx-font-size: 24;
+}

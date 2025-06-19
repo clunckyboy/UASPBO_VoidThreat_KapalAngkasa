@@ -28,7 +28,7 @@
      </columns>
    </TableView>
 
-    <Button fx:id="backButton" onAction="#handleBackButton" prefHeight="64.0" prefWidth="120.0" style="-fx-background-color: transparen;" text="Back" textFill="WHITE">
+    <Button fx:id="backButton" onAction="#handleBackButton" styleClass="recButton" prefHeight="64.0" prefWidth="120.0" text="Back">
         <font>
             <Font size="24.0" />
         </font>
