@@ -41,9 +41,9 @@ public class RecordController {
     }
 
     private void loadTopScoresFromDatabase() {
-        String url = "jdbc:postgresql://localhost:5432/void_threat";
-        String user = "postgres";
-        String password = "12345678";
+        String url = "jdbc:postgresql://ep-empty-cherry-a1ihzs91-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+        String user = "neondb_owner";
+        String password = "npg_ANZe5TQK1gop";
 
         String query = "SELECT player_name, score FROM scores ORDER BY score DESC LIMIT 10";
 
