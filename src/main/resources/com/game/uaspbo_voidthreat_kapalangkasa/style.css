@@ -1,3 +1,7 @@
+.table-cell {
+    -fx-padding: 10px 0px 10px 0px; /* atas & bawah untuk tinggi */
+}
+
 .table-view {
     -fx-background-color: black;
     -fx-control-inner-background: black;
@@ -5,39 +9,46 @@
     -fx-text-background-color: white;
     -fx-text-fill: white;
     -fx-border-color: transparent;
+    -fx-font-family: "Press Start 2P";
 }
 
 /* Gaya untuk baris-baris tabel */
 .table-row-cell {
     -fx-background-color: black;
     -fx-text-fill: white;
+    -fx-font-family: "Press Start 2P";
 }
 
 /* Gaya untuk isi sel */
 .table-cell {
     -fx-background-color: black;
     -fx-text-fill: white;
+    -fx-font-family: "Press Start 2P";
 }
 
 /* Gaya untuk header kolom */
 .table-view .column-header-background {
     -fx-background-color: black;
+    -fx-font-family: "Press Start 2P";
 }
 
 .table-view .column-header,
 .table-view .filler {
     -fx-background-color: black;
     -fx-border-color: transparent;
+    -fx-font-family: "Press Start 2P";
 }
 
 .table-view .label {
     -fx-text-fill: white;
+    -fx-font-family: "Press Start 2P";
 }
 
 /* Ubah ukuran teks pada sel data */
 .table-view .table-cell {
     -fx-font-size: 20px; /* ubah sesuai kebutuhan */
     -fx-alignment: CENTER;
+    -fx-font-family: "Press Start 2P";
 }
 
 /* Ubah ukuran teks pada header kolom */
@@ -46,6 +57,7 @@
     -fx-alignment: CENTER;
     -fx-text-fill: black;
     -fx-pref-height: 0px;
+    -fx-font-family: "Press Start 2P";
 }
 
 .table-view .scroll-bar:vertical,
@@ -57,18 +69,21 @@
     -fx-pref-height: 0;
     -fx-min-width: 0;
     -fx-min-height: 0;
+    -fx-font-family: "Press Start 2P";
 }
 
 .table-row-cell:filled:selected,
 .table-row-cell:filled:selected:hover {
     -fx-background-color: transparent;
+    -fx-font-family: "Press Start 2P";
 }
 
 .button {
     -fx-background-color: black;
     -fx-text-fill: white;
     -fx-font-family: "Press Start 2P";
-    -fx-font-size: 35;
+    -fx-font-size: 20;
+    -fx-padding: 0px;
 }
 
 .button:hover {
@@ -78,5 +93,10 @@
 }
 
 .recButton{
-    -fx-font-size: 24;
+    -fx-font-size: 20;
+}
+
+.top10Label{
+    -fx-font-family: "Press Start 2P";
+    -fx-font-size: 28;
 }

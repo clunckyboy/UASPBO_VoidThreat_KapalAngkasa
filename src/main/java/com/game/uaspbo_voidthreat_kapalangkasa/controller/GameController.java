@@ -57,6 +57,7 @@ public class GameController {
             new Image(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/megadihrocket.png").toExternalForm()),
     };
 
+
     final int MAX_BOMBS = 10, MAX_SHOTS = MAX_BOMBS * 2;
     boolean gameOver = false;
     private GraphicsContext gc;
@@ -85,6 +86,7 @@ public class GameController {
 
     /* Start Game */
     public void start(Stage stage) throws Exception {
+        System.out.println(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihroids.png").toExternalForm());
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         WIDTH = (int) primaryScreenBounds.getWidth();
         HEIGHT = (int) primaryScreenBounds.getHeight();

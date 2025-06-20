@@ -1,15 +1,13 @@
 package com.game.uaspbo_voidthreat_kapalangkasa.controller;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
-// Import ImageView if you were to use it here. For now, it's not needed in this file.
-// import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -24,43 +22,34 @@ public class MainMenuController {
         try{
 
             // Dialog untuk ambil nama
-            String playerName = null;
-            TextInputDialog dialog = new TextInputDialog("Player");
+            TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("Masukkan Nama");
             dialog.setHeaderText("Masukkan Nama Anda untuk memulai permainan");
             dialog.setContentText("Nama:");
 
             Optional<String> result = dialog.showAndWait();
-            if (result.isPresent()) {
-                playerName = result.get();
 
-                // Pindahkan seluruh logika peluncuran game ke dalam blok ini
+            if (result.isPresent()) {
+                String playerName = result.get().trim();
+
+                if (playerName.isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Nama Tidak Valid");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Nama tidak boleh kosong!");
+                    alert.showAndWait();
+                    return;
+                }
+
+                // Logika peluncuran game
                 BorderPane root = new BorderPane();
                 Scene scene = new Scene(root, 400,400);
 
                 //Game Stage
                 Stage gameStage = new Stage();
                 gameStage.setTitle("Void Threat");
-                gameStage.setMaximized(false);
+//                gameStage.setMaximized(false);
 
-                // =================================================================================
-                // IMPORTANT: CHANGE REQUIRED IN YOUR GameController.java
-                //
-                // Image smoothing must be disabled inside your GameController, where your
-                // game's sprites (player, enemies, etc.) are created as ImageView objects.
-                // You cannot set it from this MainMenuController file.
-                //
-                // Find the code in GameController.java where you create your ImageViews
-                // and add the .setSmooth(false) method call.
-                //
-                // EXAMPLE (to be placed inside GameController.java):
-                //
-                // ImageView playerSprite = new ImageView(yourPlayerImage);
-                // playerSprite.setSmooth(false); // <-- ADD THIS LINE FOR EACH SPRITE
-                //
-                // ImageView enemySprite = new ImageView(yourEnemyImage);
-                // enemySprite.setSmooth(false); // <-- AND THIS ONE
-                // =================================================================================
                 GameController gameController = new GameController(playerName);
 
                 gameController.start(gameStage);
