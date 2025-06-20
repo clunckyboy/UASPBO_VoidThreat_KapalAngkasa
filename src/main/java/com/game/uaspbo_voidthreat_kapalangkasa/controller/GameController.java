@@ -198,14 +198,12 @@ public class GameController {
         gc.fillText("Score: " + score, 75, 40);
         gc.fillText("Lives: " + lives, 75, 80);
 
-        player.posX = (int) mouseX;
-
         univ.forEach(u -> u.draw(deltaTime));
         for (int i = univ.size() - 1; i >= 0; i--) {
             if (univ.get(i).posY > HEIGHT)
                 univ.remove(i);
         }
-        if (RAND.nextInt(10) > 2) {
+        if (!paused && RAND.nextInt(10) > 2) {
             univ.add(new Universe());
         }
 
@@ -217,7 +215,29 @@ public class GameController {
             }
         }
 
+        for (int i = shots.size() - 1; i >= 0; i--) {
+            Shot shot = shots.get(i);
+            if (shot.posY < 0 || shot.toRemove) {
+                shots.remove(i);
+                continue;
+            }
+
+            shot.update(deltaTime);
+            shot.draw();
+
+            for (Bomb bomb : Bombs) {
+                if (shot.colide(bomb) && !bomb.exploding) {
+                    score++;
+                    SoundManager.playSound("sfx2.wav");
+                    bomb.explode();
+                    shot.toRemove = true;
+                }
+            }
+        }
+
         if (!gameOver && !paused) {
+            player.posX = (int) mouseX;
+
             player.update(deltaTime);
 
             if (invulnerable) {
@@ -258,23 +278,6 @@ public class GameController {
                 }
             });
 
-            for (int i = shots.size() - 1; i >= 0; i--) {
-                Shot shot = shots.get(i);
-                if (shot.posY < 0 || shot.toRemove) {
-                    shots.remove(i);
-                    continue;
-                }
-                shot.update(deltaTime);
-                shot.draw();
-                for (Bomb bomb : Bombs) {
-                    if (shot.colide(bomb) && !bomb.exploding) {
-                        score++;
-                        SoundManager.playSound("sfx2.wav");
-                        bomb.explode();
-                        shot.toRemove = true;
-                    }
-                }
-            }
 
             boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
             if (isInSpecialShotMode && !wasInSpecialShotMode) {
@@ -286,7 +289,7 @@ public class GameController {
             if (!gameOver && (!invulnerable || (int) (invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
                 player.draw();
             }
-            shots.forEach(Shot::draw);
+//            shots.forEach(Shot::draw);
         }
 
         Bombs.forEach(Rocket::draw);
@@ -388,7 +391,7 @@ public class GameController {
         }
 
         public void update(double deltaTime) {
-            if (!gameOver && !paused) {
+            if (!paused) {
                 double currentSpeed = speed;
                 if (score >= 50 && score <= 70 || score >= 120) {
                     currentSpeed = specialSpeed;
@@ -438,8 +441,13 @@ public class GameController {
             if (opacity < 0.1) opacity += 0.01;
             gc.setFill(Color.rgb(r, g, b, opacity));
             gc.fillOval((int) posX, (int) posY, w, h);
-            posY += speed * deltaTime;
+
+
+            if (!paused){
+                posY += speed * deltaTime;
+            }
         }
+
     }
 
     Bomb newBomb() {
