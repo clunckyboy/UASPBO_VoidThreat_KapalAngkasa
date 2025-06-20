@@ -18,7 +18,6 @@ public class GameApp extends Application {
                 System.out.println("Font not found via stream!");
             } else {
                 Font font = Font.loadFont(is, 12);
-                System.out.println("Font loaded: " + font.getName());
             }
         } catch (IOException e) {
             e.printStackTrace();

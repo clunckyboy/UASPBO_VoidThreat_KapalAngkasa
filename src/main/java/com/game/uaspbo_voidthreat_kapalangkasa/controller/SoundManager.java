@@ -9,6 +9,8 @@ public class SoundManager {
     // Instance variable to hold the currently playing background music clip.
     // This needs to be non-static to be controlled by a specific game instance.
     private Clip musicClip;
+    private long pausedPosition;
+    private boolean isCurrentlyLooping;
 
     /**
      * Plays a short, one-off sound effect. This is your original static method.
@@ -43,6 +45,7 @@ public class SoundManager {
         stopMusic(); // Ensure no other music is playing.
 
         try {
+            this.isCurrentlyLooping = false;
             URL introURL = SoundManager.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/" + introFile);
             if (introURL == null) {
                 System.err.println("❌ Intro music file not found: " + introFile + ". Playing loop directly.");
@@ -77,6 +80,7 @@ public class SoundManager {
      */
     private void playLoopingMusic(String loopFile) {
         try {
+            this.isCurrentlyLooping = true;
             URL loopURL = SoundManager.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/" + loopFile);
             if (loopURL == null) {
                 System.err.println("❌ Looping music file not found: " + loopFile);
@@ -95,13 +99,35 @@ public class SoundManager {
         }
     }
 
+    public void pauseMusic() {
+        if (musicClip != null && musicClip.isRunning()) {
+            this.pausedPosition = musicClip.getMicrosecondPosition(); // Simpan posisi
+            musicClip.stop(); // Hentikan pemutaran (tanpa close)
+            System.out.println("Music paused at " + this.pausedPosition);
+        }
+    }
+
+    public void resumeMusic() {
+        if (musicClip != null && !musicClip.isRunning()) {
+            musicClip.setMicrosecondPosition(this.pausedPosition); // Kembalikan ke posisi jeda
+
+            // Jika musiknya adalah tipe looping, panggil loop(). Jika tidak, panggil start().
+            if (isCurrentlyLooping) {
+                musicClip.loop(Clip.LOOP_CONTINUOUSLY);
+            } else {
+                musicClip.start();
+            }
+            System.out.println("Music resumed.");
+        }
+    }
+
     /**
      * Stops the currently playing background music and releases the clip's resources.
      */
     public void stopMusic() {
-        if (musicClip != null && musicClip.isOpen()) {
+        if (musicClip != null) {
             musicClip.stop();
-            musicClip.close();
+            if (musicClip.isOpen()) musicClip.close();
         }
     }
 }

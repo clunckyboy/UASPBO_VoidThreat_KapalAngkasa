@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import javafx.geometry.Rectangle2D;
 public class GameController {
 
     private String playerName;
+    private Font gameFont;
 
     public GameController(String playerName) {
         this.playerName = playerName;
@@ -129,6 +131,11 @@ public class GameController {
             } else if (e.getCode() == KeyCode.P) {
                 if (!gameOver) {
                     paused = !paused;
+                    if (paused){
+                        soundManager.pauseMusic();
+                    } else {
+                        soundManager.resumeMusic();
+                    }
                 }
             }
         });
@@ -168,6 +175,17 @@ public class GameController {
     }
 
     private void setup() {
+
+        try (InputStream is = getClass().getResourceAsStream("/com/game/uaspbo_voidthreat_kapalangkasa/assets/PressStart2P-Regular.ttf")) {
+            if (is == null) {
+                System.out.println("Font not found via stream!");
+            } else {
+                this.gameFont = Font.loadFont(is, 12);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         soundManager = new SoundManager();
 
         univ = new ArrayList<>();
@@ -192,13 +210,11 @@ public class GameController {
     }
 
     private void run(GraphicsContext gc, double deltaTime) {
+
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
-        gc.setFont(Font.font(30));
-        gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + score, 75, 40);
-        gc.fillText("Lives: " + lives, 75, 80);
+//        gc.setFont(Font.font(30));
 
         univ.forEach(u -> u.draw(deltaTime));
         for (int i = univ.size() - 1; i >= 0; i--) {
@@ -266,10 +282,7 @@ public class GameController {
                     SoundManager.playSound("sfx3.wav");
                     player.explode();
                     lives--;
-                    if (lives <= 0) {
-                        gameOver = true;
-                        soundManager.stopMusic();
-                    } else {
+                    if (lives > 0) {
                         invulnerable = true;
                         invulnerableTimer = 0;
                         player.posX = WIDTH / 2.0;
@@ -279,6 +292,11 @@ public class GameController {
                     }
                 }
             });
+
+            if (player.destroyed) {
+                gameOver = true;
+                soundManager.stopMusic();
+            }
 
 
             boolean isInSpecialShotMode = (score >= 50 && score <= 70 || score >= 120);
@@ -296,13 +314,23 @@ public class GameController {
 
         Bombs.forEach(Rocket::draw);
 
+        gc.setTextAlign(TextAlignment.LEFT);
+        gc.setFont(Font.font(gameFont.getFamily(), 25));
+        gc.setFill(Color.WHITE);
+        gc.setTextAlign(TextAlignment.LEFT);
+        gc.fillText("Score: " + score, 30, 60);
+        gc.setTextAlign(TextAlignment.RIGHT);
+        gc.fillText("Lives: " + lives, WIDTH - 30, 60);
+
         if (gameOver) {
-            gc.setFont(Font.font(35));
+            gc.setFont(Font.font(gameFont.getFamily(), 30));
             gc.setFill(Color.YELLOW);
+            gc.setTextAlign(TextAlignment.CENTER);
             gc.fillText("Game Over \n Your Score is: " + score + " \n Click to back to main menu", WIDTH / 2, HEIGHT / 2.5);
         } else if (paused) {
-            gc.setFont(Font.font(40));
+            gc.setFont(Font.font(gameFont.getFamily(), 50));
             gc.setFill(Color.CYAN);
+            gc.setTextAlign(TextAlignment.CENTER);
             gc.fillText("PAUSED", WIDTH / 2, HEIGHT / 2);
         }
     }
