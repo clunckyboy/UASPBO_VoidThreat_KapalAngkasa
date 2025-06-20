@@ -88,7 +88,6 @@ public class GameController {
 
     /* Start Game */
     public void start(Stage stage) throws Exception {
-        System.out.println(GameController.class.getResource("/com/game/uaspbo_voidthreat_kapalangkasa/assets/Dihroids.png").toExternalForm());
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         WIDTH = (int) primaryScreenBounds.getWidth();
         HEIGHT = (int) primaryScreenBounds.getHeight();
