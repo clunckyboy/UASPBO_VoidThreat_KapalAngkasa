@@ -497,7 +497,7 @@ public class GameController {
 
     private void saveScoreToDatabase() {
         try {
-            Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/void_threat", "postgres", "12345678");
+            Connection conn = DriverManager.getConnection("jdbc:postgresql://ep-empty-cherry-a1ihzs91-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require", "neondb_owner", "npg_ANZe5TQK1gop");
             String sql = "INSERT INTO scores (player_name, score) VALUES (?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerName);
