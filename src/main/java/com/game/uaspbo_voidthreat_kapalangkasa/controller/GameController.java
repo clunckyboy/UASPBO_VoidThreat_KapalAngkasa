@@ -213,7 +213,6 @@ public class GameController {
         gc.setFill(Color.grayRgb(20));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
         gc.setTextAlign(TextAlignment.CENTER);
-//        gc.setFont(Font.font(30));
 
         univ.forEach(u -> u.draw(deltaTime));
         for (int i = univ.size() - 1; i >= 0; i--) {
