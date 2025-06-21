@@ -1,4 +1,13 @@
-# Void Threat
+# **Void Threat**
+
+Nama Kelompok : 
+- Edwin Jonatan Purba (231401091)
+- Susena Yudha Wijaya (231401109)
+- Luthfi Zahran Panggabean (231401082)
+- Michael Valent Satrio Munthe (231401103)
+- Kevin Swandana (231401136)
+
+
 Void Threat adalah game 2D yang dibuat menggunakan Bahasa Java dan framework JavaFX
 untuk platform desktop. Tujuan dari player di game ini adalah melindungi kapal luar angkasanya 
 dari kapal atau benda luar angkasa yang akan menabrak kapal player, dengan cara menembaki benda 
