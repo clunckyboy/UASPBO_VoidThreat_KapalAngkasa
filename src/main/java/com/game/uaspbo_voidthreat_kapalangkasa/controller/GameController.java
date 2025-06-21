@@ -1,13 +1,5 @@
 package com.game.uaspbo_voidthreat_kapalangkasa.controller;
 
-import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -15,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
+
+import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -35,7 +35,6 @@ public class GameController {
         this.playerName = playerName;
     }
 
-    //variables
     private static final Random RAND = new Random();
     private static int WIDTH;
     private static int HEIGHT;
@@ -83,10 +82,9 @@ public class GameController {
     private static final double INVULNERABILITY_DURATION = 2.0;
     private static final double RESPAWN_FLASH_INTERVAL = 0.1;
 
-    // Instance of SoundManager for BGM control
+    // Permainan Musik
     private SoundManager soundManager;
 
-    /* Start Game */
     public void start(Stage stage) throws Exception {
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         WIDTH = (int) primaryScreenBounds.getWidth();
@@ -177,7 +175,7 @@ public class GameController {
 
         try (InputStream is = getClass().getResourceAsStream("/com/game/uaspbo_voidthreat_kapalangkasa/assets/PressStart2P-Regular.ttf")) {
             if (is == null) {
-                System.out.println("Font not found via stream!");
+                System.out.println("Font tidak ditemukan");
             } else {
                 this.gameFont = Font.loadFont(is, 12);
             }
@@ -307,7 +305,6 @@ public class GameController {
             if (!gameOver && (!invulnerable || (int) (invulnerableTimer / RESPAWN_FLASH_INTERVAL) % 2 == 0)) {
                 player.draw();
             }
-//            shots.forEach(Shot::draw);
         }
 
         Bombs.forEach(Rocket::draw);
@@ -447,7 +444,7 @@ public class GameController {
 
     public class Universe {
         double posX, posY;
-        private int h, w, r, g, b;
+        private int w, h, b, g, r;
         private double opacity;
         private final double speed = 200;
 
@@ -469,7 +466,6 @@ public class GameController {
             if (opacity < 0.1) opacity += 0.01;
             gc.setFill(Color.rgb(r, g, b, opacity));
             gc.fillOval((int) posX, (int) posY, w, h);
-
 
             if (!paused){
                 posY += speed * deltaTime;

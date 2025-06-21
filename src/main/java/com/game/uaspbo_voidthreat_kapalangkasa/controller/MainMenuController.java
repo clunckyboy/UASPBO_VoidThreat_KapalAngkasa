@@ -1,5 +1,7 @@
 package com.game.uaspbo_voidthreat_kapalangkasa.controller;
 
+import java.util.Optional;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -11,17 +13,13 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-
-import java.util.Optional;
-
-
 public class MainMenuController {
 
     @FXML
     private void handlePlayGame(ActionEvent event){
         try{
 
-            // Dialog untuk ambil nama
+            // Dialog untuk input nama
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle("Masukkan Nama");
             dialog.setHeaderText("Masukkan Nama Anda untuk memulai permainan");
@@ -45,10 +43,8 @@ public class MainMenuController {
                 BorderPane root = new BorderPane();
                 Scene scene = new Scene(root, 400,400);
 
-                //Game Stage
                 Stage gameStage = new Stage();
                 gameStage.setTitle("Void Threat");
-//                gameStage.setMaximized(false);
 
                 GameController gameController = new GameController(playerName);
 
@@ -57,9 +53,6 @@ public class MainMenuController {
                 Stage currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
                 currentStage.close();
             }
-            // Jika result.isPresent() false (cancel ditekan), tidak ada yang terjadi,
-            // dan aplikasi tetap di Main Menu.
-
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -88,8 +81,6 @@ public class MainMenuController {
 
     @FXML
     private void handleExit() {
-        // Cara standar menutup aplikasi
         System.exit(0);
-
     }
 }

@@ -1,25 +1,21 @@
 package com.game.uaspbo_voidthreat_kapalangkasa.controller;
-
 import com.game.uaspbo_voidthreat_kapalangkasa.model.PlayerRecord;
+
+import java.sql.*;
+import java.io.IOException;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-
-
-import java.sql.*;
-
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import javafx.event.ActionEvent;
-import java.io.IOException;
 
 public class RecordController {
 
@@ -88,7 +84,4 @@ public class RecordController {
             e.printStackTrace();
         }
     }
-
-
-
 }
