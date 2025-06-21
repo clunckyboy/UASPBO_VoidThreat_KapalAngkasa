@@ -33,7 +33,9 @@ Pemain bisa melihat nama dan skor pemain lain dari menu leaderboard. Menu leader
 ## Instalasi dan Menjalankan Aplikasi
 1. Clone repositori ini
 
-```git clone https://github.com/clunckyboy/UASPBO_VoidThreat_KapalAngkasa.git```
+```
+git clone https://github.com/clunckyboy/UASPBO_VoidThreat_KapalAngkasa.git
+```
 
 2. Buka folder tersebut menggunakan IntelliJ
 3. Pergi ke ```src/main/java/com/game/uaspbo_voidthreat_kapalangkasa/GameApp.java```
