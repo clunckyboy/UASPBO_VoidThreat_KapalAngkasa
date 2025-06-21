@@ -52,7 +52,10 @@ git clone https://github.com/clunckyboy/UASPBO_VoidThreat_KapalAngkasa.git
 5. Selamat bermain
 
 ## Link Video Presentasi
+[![Tonton Videonya](https://img.youtube.com/vi/yT6mubNFHpM/mqdefault.jpg)](https://youtu.be/yT6mubNFHpM)
+
 https://youtu.be/yT6mubNFHpM
+
 
 
 
